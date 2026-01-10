@@ -1,4 +1,4 @@
-import djs, { type ChatInputCommandInteraction, type PermissionsString } from 'discord.js'
+import { version as djsVersion, type ChatInputCommandInteraction, type PermissionsString } from 'discord.js'
 import { createRequire } from 'node:module'
 import os from 'node:os'
 import typescript from 'typescript'
@@ -60,7 +60,7 @@ export class DevCommand implements Command {
             NODE_VERSION: process.version,
             TS_VERSION: `v${typescript.version}`,
             ES_VERSION: TsConfig.compilerOptions.target,
-            DJS_VERSION: `v${djs.version}`,
+            DJS_VERSION: `v${djsVersion}`,
             SHARD_COUNT: shardCount.toLocaleString(data.lang),
             SERVER_COUNT: serverCount.toLocaleString(data.lang),
             SERVER_COUNT_PER_SHARD: Math.round(serverCount / shardCount).toLocaleString(data.lang),

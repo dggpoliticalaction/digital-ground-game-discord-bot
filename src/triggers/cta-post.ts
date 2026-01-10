@@ -1,5 +1,5 @@
 import { ChannelType, type PublicThreadChannel, ThreadAutoArchiveDuration, MessageFlags, AttachmentBuilder, type Message, type GuildBasedChannel } from "discord.js";
-import { type Trigger } from "./trigger";
+import { type Trigger } from "./trigger.js";
 import { BarController, Colors, BarElement, CategoryScale, Chart, LinearScale, PieController, ArcElement, Legend, Title } from "chart.js";
 import { Canvas } from "canvas";
 import { Logger } from "../services/index.js";
