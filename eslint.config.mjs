@@ -8,7 +8,7 @@ export default [
   ...tseslint.configs.recommended,
 
   {
-    files: ["**/*.ts"],
+    files: ["src/**/*.ts"],
     languageOptions: {
       parserOptions: {
         project: true
@@ -29,7 +29,6 @@ export default [
           caughtErrorsIgnorePattern: "^_",
         },
       ],
-      "@typescript-eslint/no-explicit-any": "error",
       "@typescript-eslint/explicit-module-boundary-types": "error",
       "@typescript-eslint/no-empty-function": "error",
       "@typescript-eslint/no-explicit-any": "error",
