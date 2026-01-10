@@ -1,18 +1,28 @@
 {
+  "$schema": "https://json.schemastore.org/tsconfig",
   "compilerOptions": {
-    "target": "ES2022",
-    "lib": ["ES2022"],
-    "module": "nodenext",
-    "moduleResolution": "nodenext",
+    "target": "es2021",
+    "module": "esnext",
+    "lib": ["es2021"],
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "outDir": "./dist",
+    "rootDir": "./src",
     "strict": false,
-
-    "outDir": "dist",
-    "rootDir": "src",
-
+    "moduleResolution": "node",
     "esModuleInterop": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "skipLibCheck": true
+    "incremental": false,
+    "isolatedModules": true,
+    "moduleDetection": "force",
+    "noUncheckedIndexedAccess": true,
+    "resolveJsonModule": true,
+    "noImplicitOverride": true,
+    "strictNullChecks": true
   },
-  "include": ["src"]
+  "exclude": ["dist", "node_modules", "tests", "vitest.config.ts"]
 }
-
