@@ -260,5 +260,15 @@ export class Permission {
         return Lang.getRef('permissions.ViewGuildInsights', langCode)
       },
     },
+    PinMessages: {
+      displayName(langCode: Locale): string {
+        return Lang.getRef('permissions.PinMessage', langCode)
+      },
+    },
+    BypassSlowmode: {
+      displayName(langCode: Locale): string {
+        return Lang.getRef('permissions.BypassSlowmode', langCode)
+      },
+    },
   }
 }
