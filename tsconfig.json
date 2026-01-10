@@ -1,11 +1,11 @@
 {
-  "extends": "@repo/typescript-config/base.json",
-
+  "$schema": "https://json.schemastore.org/tsconfig",
   "compilerOptions": {
     "target": "es2021",
     "module": "esnext",
     "lib": ["es2021"],
     "declaration": true,
+    "declarationMap": true,
     "sourceMap": true,
     "outDir": "./dist",
     "rootDir": "./src",
@@ -15,7 +15,14 @@
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true
+    "forceConsistentCasingInFileNames": true,
+    "incremental": false,
+    "isolatedModules": true,
+    "moduleDetection": "force",
+    "noUncheckedIndexedAccess": true,
+    "resolveJsonModule": true,
+    "noImplicitOverride": true,
+    "strictNullChecks": true
   },
   "exclude": ["dist", "node_modules", "tests", "vitest.config.ts"]
 }

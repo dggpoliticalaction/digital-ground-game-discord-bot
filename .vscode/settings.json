@@ -40,5 +40,6 @@
     "unescapes",
     "varchar"
   ],
-  "typescript.preferences.importModuleSpecifierEnding": "js"
+  "typescript.preferences.importModuleSpecifierEnding": "js",
+  "npm.packageManager": "pnpm"
 }
