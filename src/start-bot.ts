@@ -48,9 +48,6 @@ const Config = require('../config/config.json')
 const Logs = require('../lang/logs.json')
 
 async function start(): Promise<void> {
-  // Services
-  const eventDataService = new EventDataService()
-
   // Client
   const client = new CustomClient({
     intents: Config.client.intents,
@@ -98,6 +95,17 @@ async function start(): Promise<void> {
     new CTAPostTrigger()
   ]
 
+
+  // Jobs
+  const jobs: Job[] = [
+    // TODO: Add new jobs here
+  ]
+
+  // Services
+  const eventDataService = new EventDataService()
+  const jobService = new JobService(jobs)
+  const eventNotificationService = new EventNotificationService(jobService)
+
   // Event handlers
   const guildJoinHandler = new GuildJoinHandler(eventDataService)
   const guildLeaveHandler = new GuildLeaveHandler()
@@ -106,11 +114,6 @@ async function start(): Promise<void> {
   const triggerHandler = new TriggerHandler(triggers, eventDataService)
   const messageHandler = new MessageHandler(triggerHandler)
   const reactionHandler = new ReactionHandler(reactions, eventDataService)
-
-  // Jobs
-  const jobs: Job[] = [
-    // TODO: Add new jobs here
-  ]
 
   // Bot
   const bot = new Bot(
@@ -122,8 +125,8 @@ async function start(): Promise<void> {
     commandHandler,
     buttonHandler,
     reactionHandler,
-    new JobService(jobs),
-    new EventNotificationService(),
+    jobService,
+    eventNotificationService,
   )
 
   // Register

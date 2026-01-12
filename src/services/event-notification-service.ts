@@ -1,3 +1,4 @@
+import { type JobService } from './job-service.js'
 import { Logger } from './index.js'
 
 import { createRequire } from 'node:module'
@@ -5,6 +6,8 @@ const require = createRequire(import.meta.url)
 const Logs = require('../../lang/logs.json')
 
 export class EventNotificationService {
+  constructor(private jobService: JobService) {}
+
   public start(): void {
     Logger.info(Logs.info.eventNotifierStarted)
 
