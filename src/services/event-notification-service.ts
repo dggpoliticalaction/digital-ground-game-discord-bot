@@ -6,7 +6,7 @@ const Logs = require('../../lang/logs.json')
 
 export class EventNotificationService {
   public start(): void {
-    Logger.info(Logs.info.EventNotifierStarted)
+    Logger.info(Logs.info.eventNotifierStarted)
 
     // Fetch all currently scheduled events
 
