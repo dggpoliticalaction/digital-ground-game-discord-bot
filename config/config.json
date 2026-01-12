@@ -50,6 +50,9 @@
       "log": false,
       "runOnce": false,
       "initialDelaySecs": 0
+    },
+    "eventNotification": {
+      "reminderTimesInMins": [30, 720]
     }
   },
   "rateLimiting": {
