@@ -13,6 +13,7 @@
     "commandActionDeleted": "Command deleted.",
     "commandActionClearing": "Deleting all commands: {COMMAND_LIST}",
     "commandActionCleared": "Commands deleted.",
+    "eventNotifierStarted": "EventNotificationService started.",
     "managerSpawningShards": "Spawning {SHARD_COUNT} shards: [{SHARD_LIST}].",
     "managerLaunchedShard": "Launched Shard {SHARD_ID}.",
     "managerAllShardsSpawned": "All shards have been spawned.",

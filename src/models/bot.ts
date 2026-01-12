@@ -25,7 +25,7 @@ import {
   type MessageHandler,
   type ReactionHandler,
 } from '../events/index.js'
-import { type JobService, Logger } from '../services/index.js'
+import { type JobService, Logger, type EventNotificationService} from '../services/index.js'
 import { PartialUtils } from '../utils/index.js'
 import { CTAPostTrigger } from '../triggers/cta-post.js'
 
@@ -49,6 +49,7 @@ export class Bot {
     private buttonHandler: ButtonHandler,
     private reactionHandler: ReactionHandler,
     private jobService: JobService,
+    private eventNotificationService: EventNotificationService,
   ) { }
 
   public async start(): Promise<void> {
@@ -91,6 +92,7 @@ export class Bot {
 
     if (!Debug.dummyMode.enabled) {
       this.jobService.start()
+      this.eventNotificationService.start()
     }
 
     this.ready = true

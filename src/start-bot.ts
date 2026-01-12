@@ -38,6 +38,7 @@ import {
   EventDataService,
   JobService,
   Logger,
+  EventNotificationService,
 } from './services/index.js'
 import { type Trigger } from './triggers/index.js'
 import { CTAPostTrigger } from './triggers/cta-post.js'
@@ -122,6 +123,7 @@ async function start(): Promise<void> {
     buttonHandler,
     reactionHandler,
     new JobService(jobs),
+    new EventNotificationService(),
   )
 
   // Register
