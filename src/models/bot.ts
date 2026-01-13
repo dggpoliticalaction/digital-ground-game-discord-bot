@@ -92,7 +92,7 @@ export class Bot {
 
     if (!Debug.dummyMode.enabled) {
       this.jobService.start()
-      this.eventNotificationService.start(this.client)
+      await this.eventNotificationService.start(this.client)
     }
 
     this.ready = true
