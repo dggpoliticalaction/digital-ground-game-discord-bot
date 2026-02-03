@@ -1,7 +1,4 @@
-import {
-  type PermissionsString,
-  type UserContextMenuCommandInteraction,
-} from 'discord.js'
+import { type PermissionsString, type UserContextMenuCommandInteraction } from 'discord.js'
 import { RateLimiter } from 'discord.js-rate-limiter'
 
 import { Language } from '../../models/enum-helpers/index.js'
@@ -26,20 +23,20 @@ export class SendDevOnboarding implements Command {
       // Send the onboarding info
       await MessageUtils.send(
         intr.targetUser,
-        Lang.getEmbed("displayEmbeds.devOnboarding", data.lang, {
-          CONTENT: DevOnboarding.Message
-        })
+        Lang.getEmbed('displayEmbeds.devOnboarding', data.lang, {
+          CONTENT: DevOnboarding.Message,
+        }),
       )
 
       // Inform the sender it worked
       await InteractionUtils.send(intr, {
-        content: `${Lang.getCom("emojis.yes")} Sent onboarding info to ${intr.targetUser.tag}!`,
+        content: `${Lang.getCom('emojis.yes')} Sent onboarding info to ${intr.targetUser.tag}!`,
         ephemeral: true,
       })
     } catch {
       // Inform the sender it didn't work
       await InteractionUtils.send(intr, {
-        content: `${Lang.getCom("emojis.no")} User DMs are disabled! Failed to send.`,
+        content: `${Lang.getCom('emojis.no')} User DMs are disabled! Failed to send.`,
         ephemeral: true,
       })
 

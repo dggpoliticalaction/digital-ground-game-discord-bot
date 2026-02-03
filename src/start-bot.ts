@@ -79,7 +79,7 @@ async function start(): Promise<void> {
 
     // User Context Commands
     new ViewDateJoined(),
-    new SendDevOnboarding()
+    new SendDevOnboarding(),
   ]
 
   // Buttons
@@ -95,7 +95,7 @@ async function start(): Promise<void> {
   // Triggers
   const triggers: Trigger[] = [
     // TODO: Add new triggers here
-    new CTAPostTrigger()
+    new CTAPostTrigger(),
   ]
 
   // Event handlers

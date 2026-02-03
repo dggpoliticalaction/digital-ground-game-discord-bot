@@ -2,6 +2,10 @@
 
 Uses the [discord.js](https://discord.js.org/) framework.
 
+## Upstream Template
+
+This template for a Discord bot was based upon this public template. https://github.com/KevinNovak/Discord-Bot-TypeScript-Template
+
 ## Setup
 
 1. Copy example config files.
@@ -9,20 +13,20 @@ Uses the [discord.js](https://discord.js.org/) framework.
    Run this command to create your local config and .env files:
 
    ```
-   pnpm copyconfig
+   npm copyconfig
    ```
 
 2. Fill your .env - see below.
 
-3. `pnpm install`
+3. `npm install`
 
 4. Register commands.
    - In order to use slash commands, they first [have to be registered](https://discordjs.guide/creating-your-bot/command-deployment.html).
-   - Type `pnpm run commands:register` to register the bot's commands.
+   - Type `npm run commands:register` to register the bot's commands.
      - Run this script any time you change a command name, structure, or add/remove commands.
      - This is so Discord knows what your commands look like.
      - It may take up to an hour for command changes to appear.
-5. `pnpm start`
+5. `npm start`
 
 ## Environment Variables
 
