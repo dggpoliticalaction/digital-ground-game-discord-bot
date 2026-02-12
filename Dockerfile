@@ -1,4 +1,4 @@
-FROM node:16
+FROM node:22.12
 
 # Create app directory
 WORKDIR /app
@@ -11,6 +11,8 @@ RUN npm install
 
 # Copy the app code
 COPY . .
+COPY config/bot-sites.example.json config/bot-sites.json
+COPY config/debug.example.json config/debug.json
 
 # Build the project
 RUN npm run build
