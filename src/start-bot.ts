@@ -25,12 +25,13 @@ import {
   CommandHandler,
   GuildJoinHandler,
   GuildLeaveHandler,
+  GuildMemberUpdateHandler,
   MessageHandler,
   ReactionHandler,
   TriggerHandler,
 } from './events/index.js'
 import { CustomClient } from './extensions/index.js'
-import { type Job } from './jobs/index.js'
+import { AutoCloseWelcomeThreadsJob, type Job } from './jobs/index.js'
 import { Bot } from './models/bot.js'
 import { type Reaction } from './reactions/index.js'
 import {
@@ -38,6 +39,7 @@ import {
   EventDataService,
   JobService,
   Logger,
+  OnboardingStateService,
 } from './services/index.js'
 import { type Trigger } from './triggers/index.js'
 import { CTAPostTrigger } from './triggers/cta-post.js'
@@ -99,8 +101,10 @@ async function start(): Promise<void> {
   ]
 
   // Event handlers
+  const onboardingStateService = new OnboardingStateService()
   const guildJoinHandler = new GuildJoinHandler(eventDataService)
   const guildLeaveHandler = new GuildLeaveHandler()
+  const guildMemberUpdateHandler = new GuildMemberUpdateHandler(onboardingStateService)
   const commandHandler = new CommandHandler(commands, eventDataService)
   const buttonHandler = new ButtonHandler(buttons, eventDataService)
   const triggerHandler = new TriggerHandler(triggers, eventDataService)
@@ -108,9 +112,7 @@ async function start(): Promise<void> {
   const reactionHandler = new ReactionHandler(reactions, eventDataService)
 
   // Jobs
-  const jobs: Job[] = [
-    // TODO: Add new jobs here
-  ]
+  const jobs: Job[] = [new AutoCloseWelcomeThreadsJob(client)]
 
   // Bot
   const bot = new Bot(
@@ -118,6 +120,7 @@ async function start(): Promise<void> {
     client,
     guildJoinHandler,
     guildLeaveHandler,
+    guildMemberUpdateHandler,
     messageHandler,
     commandHandler,
     buttonHandler,
