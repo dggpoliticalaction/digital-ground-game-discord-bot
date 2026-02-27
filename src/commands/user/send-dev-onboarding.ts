@@ -14,7 +14,8 @@ export class SendDevOnboarding implements Command {
   public cooldown = new RateLimiter(5, 5000)
   public deferType = CommandDeferType.HIDDEN
   public requireClientPerms: PermissionsString[] = []
-  public requireRoles = [ServerRoles.COORDINATOR.id]
+  public requireRoles = [ServerRoles.COORDINATOR.id, ServerRoles.ADMIN.id, ServerRoles.DIRECTOR.id,
+                         ServerRoles.ORGANIZER.id, ServerRoles.TEAM_LEAD.id]
 
   public constructor() {
     Logger.info(`Created SendDevOnboarding command add: ${this.names}`)
@@ -35,6 +36,8 @@ export class SendDevOnboarding implements Command {
         content: `${Lang.getCom('emojis.yes')} Sent onboarding info to ${intr.targetUser.tag}!`,
         ephemeral: true,
       })
+
+      Logger.info(`Send dev onboarding to ${intr.targetUser.displayName}`)
     } catch {
       // Inform the sender it didn't work
       await InteractionUtils.send(intr, {
