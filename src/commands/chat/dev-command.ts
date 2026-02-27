@@ -21,7 +21,7 @@ const TsConfig = require('../../../tsconfig.json')
 export class DevCommand implements Command {
   public names = [Lang.getRef('chatCommands.dev', Language.Default)]
   public deferType = CommandDeferType.HIDDEN
-  public requireClientPerms: PermissionsString[] = []
+  public requiServerRolereClientPerms: PermissionsString[] = []
   public async execute(intr: ChatInputCommandInteraction, data: EventData): Promise<void> {
     if (!getDeveloperIds().includes(intr.user.id)) {
       await InteractionUtils.send(intr, Lang.getEmbed('validationEmbeds.devOnly', data.lang))
