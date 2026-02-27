@@ -88,7 +88,7 @@ export class CommandUtils {
       if (!intr.inGuild() || !(intr?.member instanceof GuildMember)) {
         await InteractionUtils.send(
           intr,
-          Lang.getEmbed("validationEmbeds.guildOnly", data.lang)
+          Lang.getEmbed('validationEmbeds.guildOnly', data.lang),
         )
         return false
       }
@@ -98,7 +98,7 @@ export class CommandUtils {
       if (guildMem == null) {
         await InteractionUtils.send(
           intr,
-          Lang.getEmbed("validationEmbeds.nullMember", data.lang)
+          Lang.getEmbed('validationEmbeds.nullMember', data.lang),
         )
         return false
       }
@@ -115,7 +115,7 @@ export class CommandUtils {
           Lang.getEmbed('validationEmbeds.missingRole', data.lang, {
             ROLES: command.requireRoles
                     .map(getRoleNameById)
-                    .join(', ')
+                    .join(', '),
           }),
         )
         return false
