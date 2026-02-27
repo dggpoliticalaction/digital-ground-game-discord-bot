@@ -12,7 +12,7 @@ import { type Command } from '../commands/index.js'
 import { getRoleNameById } from '../constants/index.js'
 import { Permission } from '../models/enum-helpers/index.js'
 import { type EventData } from '../models/internal-models.js'
-import { Lang } from '../services/index.js'
+import { Lang, Logger } from '../services/index.js'
 
 export class CommandUtils {
   public static findCommand(commands: Command[], commandParts: string[]): Command | null {
@@ -118,6 +118,9 @@ export class CommandUtils {
                     .join(', '),
           }),
         )
+
+        Logger.warn(`${intr.user.displayName} failed role check for send dev onboarding command`)
+
         return false
       }
     }
