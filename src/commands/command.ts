@@ -14,7 +14,7 @@ export interface Command {
   cooldown?: RateLimiter
   deferType: CommandDeferType
   requireClientPerms: PermissionsString[]
-  requireRoles: string[]
+  requireRoles?: string[]
   autocomplete?(
     intr: AutocompleteInteraction,
     option: AutocompleteFocusedOption,
