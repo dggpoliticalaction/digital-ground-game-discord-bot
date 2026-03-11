@@ -26,6 +26,7 @@ import {
   GuildLeaveHandler,
   GuildMemberAddHandler,
   GuildMemberUpdateHandler,
+  GuildScheduledEventHandler,
   MessageHandler,
   ReactionHandler,
   TriggerHandler,
@@ -37,6 +38,7 @@ import { type Reaction } from './reactions/index.js'
 import {
   CommandRegistrationService,
   EventDataService,
+  GoogleCalendarService,
   JobService,
   Logger,
 } from './services/index.js'
@@ -95,6 +97,13 @@ async function start(): Promise<void> {
     new CTAPostTrigger(),
   ]
 
+  // Google Calendar sync (optional: set GOOGLE_CALENDAR_ID and GOOGLE_APPLICATION_CREDENTIALS)
+  const googleCalendarService = new GoogleCalendarService(
+    process.env.GOOGLE_CALENDAR_ID,
+    process.env.GOOGLE_APPLICATION_CREDENTIALS,
+  )
+  const guildScheduledEventHandler = new GuildScheduledEventHandler(googleCalendarService)
+
   // Event handlers
   const guildJoinHandler = new GuildJoinHandler(eventDataService)
   const guildLeaveHandler = new GuildLeaveHandler()
@@ -121,6 +130,7 @@ async function start(): Promise<void> {
     commandHandler,
     buttonHandler,
     reactionHandler,
+    guildScheduledEventHandler,
     new JobService(jobs),
   )
 

@@ -6,6 +6,7 @@
 
 /config/bot-sites.json
 /config/debug.json
+/config/calendar-sync-state.json
 
 
 # =====================================================

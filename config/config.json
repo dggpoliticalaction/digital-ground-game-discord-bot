@@ -9,7 +9,8 @@
       "GuildMessageReactions",
       "DirectMessages",
       "DirectMessageReactions",
-      "MessageContent"
+      "MessageContent",
+      "GuildScheduledEvents"
     ],
     "partials": ["Message", "Channel", "Reaction"],
     "caches": {

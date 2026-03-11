@@ -26,6 +26,7 @@ import {
   type GuildLeaveHandler,
   type GuildMemberAddHandler,
   type GuildMemberUpdateHandler,
+  type GuildScheduledEventHandler,
   type MessageHandler,
   type ReactionHandler,
 } from '../events/index.js'
@@ -54,6 +55,7 @@ export class Bot {
     private commandHandler: CommandHandler,
     private buttonHandler: ButtonHandler,
     private reactionHandler: ReactionHandler,
+    private guildScheduledEventHandler: GuildScheduledEventHandler,
     private jobService: JobService,
   ) {}
 
@@ -81,6 +83,15 @@ export class Bot {
       Events.MessageReactionAdd,
       (messageReaction: MessageReaction | PartialMessageReaction, user: User | PartialUser) =>
         this.onReaction(messageReaction, user),
+    )
+    this.client.on(Events.GuildScheduledEventCreate, (event) =>
+      this.guildScheduledEventHandler.processCreate(event),
+    )
+    this.client.on(Events.GuildScheduledEventUpdate, (_old, event) =>
+      this.guildScheduledEventHandler.processUpdate(event),
+    )
+    this.client.on(Events.GuildScheduledEventDelete, (event) =>
+      this.guildScheduledEventHandler.processDelete(event),
     )
     this.client.rest.on(RESTEvents.RateLimited, (rateLimitData: RateLimitData) =>
       this.onRateLimit(rateLimitData),
