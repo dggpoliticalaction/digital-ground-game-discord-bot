@@ -133,6 +133,15 @@
       },
       "census": {
         "title": "{{REF:links.censusEmbed}}"
+      },
+      "attendanceStarted": {
+        "description": "Taking attendance for **{{CHANNEL_NAME}}**. You'll receive a DM with everyone's name and ID when you leave the voice channel."
+      },
+      "attendanceNotInVC": {
+        "description": "You must be in a voice channel to take attendance. Join a voice channel and run this command again."
+      },
+      "attendanceAlreadyTracking": {
+        "description": "You're already taking attendance in another channel. Leave that channel first to get your list, then run this again in a new channel if needed."
       }
     },
     "validationEmbeds": {
@@ -219,7 +228,8 @@
       "test": "test",
       "rules": "rules",
       "pragPapers": "prag-papers",
-      "census": "census"
+      "census": "census",
+      "attendance": "attendance"
     },
     "userCommands": {
       "sendDevOnboarding": "Send Dev Onboarding"
@@ -237,7 +247,8 @@
       "test": "Run the test command.",
       "rules": "List the rules, or a specific one.",
       "pragPapers": "Gives a link to the Pragmatic Papers website.",
-      "census": "Gives a link to the Census form."
+      "census": "Gives a link to the Census form.",
+      "attendance": "Take attendance of who is in your voice channel. You'll get a DM with names and IDs when you leave."
     },
     "argDescs": {
       "devCommand": "Command.",

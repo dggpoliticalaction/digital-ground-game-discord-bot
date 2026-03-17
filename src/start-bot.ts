@@ -11,6 +11,7 @@ import {
   RulesCommand,
   TestCommand,
   CensusCommand,
+  AttendanceCommand,
 } from './commands/chat/index.js'
 import {
   ChatCommandMetadata,
@@ -29,12 +30,14 @@ import {
   MessageHandler,
   ReactionHandler,
   TriggerHandler,
+  VoiceStateUpdateHandler,
 } from './events/index.js'
 import { CustomClient } from './extensions/index.js'
 import { AutoCloseWelcomeThreadsJob, type Job } from './jobs/index.js'
 import { Bot } from './models/bot.js'
 import { type Reaction } from './reactions/index.js'
 import {
+  AttendanceService,
   CommandRegistrationService,
   EventDataService,
   JobService,
@@ -50,6 +53,7 @@ const Logs = require('../lang/logs.json')
 async function start(): Promise<void> {
   // Services
   const eventDataService = new EventDataService()
+  const attendanceService = new AttendanceService()
 
   // Client
   const client = new CustomClient({
@@ -74,6 +78,7 @@ async function start(): Promise<void> {
     new RulesCommand(),
     new PragPapersCommand(),
     new CensusCommand(),
+    new AttendanceCommand(attendanceService),
 
     // User Context Commands
     new SendDevOnboarding(),
@@ -105,6 +110,7 @@ async function start(): Promise<void> {
   const triggerHandler = new TriggerHandler(triggers, eventDataService)
   const messageHandler = new MessageHandler(triggerHandler)
   const reactionHandler = new ReactionHandler(reactions, eventDataService)
+  const voiceStateUpdateHandler = new VoiceStateUpdateHandler(attendanceService, client)
 
   // Jobs
   const jobs: Job[] = [new AutoCloseWelcomeThreadsJob(client)]
@@ -122,6 +128,7 @@ async function start(): Promise<void> {
     buttonHandler,
     reactionHandler,
     new JobService(jobs),
+    voiceStateUpdateHandler,
   )
 
   // Register
