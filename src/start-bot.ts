@@ -12,6 +12,7 @@ import {
   TestCommand,
   CensusCommand,
   AttendanceCommand,
+  AttendanceTrackCommand,
 } from './commands/chat/index.js'
 import {
   ChatCommandMetadata,
@@ -78,7 +79,8 @@ async function start(): Promise<void> {
     new RulesCommand(),
     new PragPapersCommand(),
     new CensusCommand(),
-    new AttendanceCommand(attendanceService),
+    new AttendanceCommand(),
+    new AttendanceTrackCommand(attendanceService),
 
     // User Context Commands
     new SendDevOnboarding(),

@@ -5,25 +5,34 @@ export interface AttendanceEntry {
   displayName: string
 }
 
+/** Plain-text body for a DM listing VC attendance (snapshot or tracked session). */
+export function formatAttendanceDmBody(channelName: string, entries: AttendanceEntry[]): string {
+  const lines = entries.map((e) => `${e.displayName} (${e.id})`)
+  return lines.length > 0
+    ? `**Attendance for ${channelName}**\n\n${lines.join('\n')}`
+    : `**Attendance for ${channelName}**\n\nNo one else was in the channel.`
+}
+
 interface AttendanceSession {
   channelId: string
   guildId: string
   channelName: string
-  /** Map of user id -> display name (includes everyone who was in the channel at any time) */
+  /** Cumulative: everyone in the call when tracking started, plus anyone who joins later. */
   members: Map<string, string>
 }
 
 /**
- * Tracks VC "attendance" per user: when a user runs /attendance we record who is in the channel
- * and keep updating as people join/leave. When the tracking user leaves, we return the final list.
+ * Tracks VC attendance for `/attendance-track`: seeds with everyone currently in the channel when
+ * the command runs; anyone who joins after that is added and never removed when they leave. When
+ * the tracker leaves, the session ends and the list is sent by DM.
  */
 export class AttendanceService {
   /** Tracker user id -> session for that user's VC */
   private sessions = new Map<string, AttendanceSession>()
 
   /**
-   * Start tracking attendance for a user in their current voice channel.
-   * Returns true if started, false if already tracking or not in VC.
+   * Start tracking in the user's current voice channel.
+   * `initialMembers` should include everyone in that channel at invocation (e.g. voiceChannel.members).
    */
   startTracking(
     userId: string,
@@ -49,8 +58,9 @@ export class AttendanceService {
   }
 
   /**
-   * Handle a voice state update: add/remove members from relevant sessions,
-   * and if the tracker left the channel, return their attendance list and clear the session.
+   * On voice state change: if a user joins or moves into a tracked channel, add them to that
+   * session’s cumulative roster. If the tracker leaves their tracked channel, finalize and return
+   * the roster for the attendance DM.
    */
   handleVoiceStateUpdate(
     oldState: VoiceState,
@@ -68,16 +78,10 @@ export class AttendanceService {
       oldState.member?.user?.username ??
       'Unknown'
 
-    // Update all sessions that are for this channel (someone joined or left)
-    const channelId = newChannelId ?? oldChannelId
-    if (channelId) {
+    if (newChannelId !== null && oldChannelId !== newChannelId) {
       for (const session of this.sessions.values()) {
-        if (session.channelId !== channelId) continue
-        if (newChannelId === channelId) {
-          session.members.set(memberId, displayName)
-        } else {
-          session.members.delete(memberId)
-        }
+        if (session.channelId !== newChannelId) continue
+        session.members.set(memberId, displayName)
       }
     }
 

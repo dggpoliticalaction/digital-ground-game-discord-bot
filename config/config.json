@@ -5,6 +5,7 @@
     "intents": [
       "Guilds",
       "GuildMembers",
+      "GuildVoiceStates",
       "GuildPresences",
       "GuildMessages",
       "GuildMessageReactions",

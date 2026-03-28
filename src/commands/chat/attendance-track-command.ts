@@ -8,19 +8,18 @@ import {
 import { RateLimiter } from 'discord.js-rate-limiter'
 import { Language } from '../../models/enum-helpers/index.js'
 import { type EventData } from '../../models/internal-models.js'
-import {
-  formatAttendanceDmBody,
-  type AttendanceEntry,
-} from '../../services/attendance-service.js'
+import type { AttendanceService } from '../../services/attendance-service.js'
 import { Lang } from '../../services/index.js'
-import { InteractionUtils, MessageUtils } from '../../utils/index.js'
+import { InteractionUtils } from '../../utils/index.js'
 import { type Command, CommandDeferType } from '../index.js'
 
-export class AttendanceCommand implements Command {
-  public names = [Lang.getRef('chatCommands.attendance', Language.Default)]
+export class AttendanceTrackCommand implements Command {
+  public names = [Lang.getRef('chatCommands.attendanceTrack', Language.Default)]
   public cooldown = new RateLimiter(1, 5000)
   public deferType = CommandDeferType.PUBLIC
   public requireClientPerms: PermissionsString[] = []
+
+  constructor(private readonly attendanceService: AttendanceService) {}
 
   public async execute(intr: ChatInputCommandInteraction, data: EventData): Promise<void> {
     if (!intr.guild) {
@@ -42,18 +41,32 @@ export class AttendanceCommand implements Command {
       return
     }
 
-    const entries: AttendanceEntry[] = Array.from(voiceChannel.members.values()).map((m) => ({
+    if (this.attendanceService.isTracking(intr.user.id)) {
+      await InteractionUtils.send(
+        intr,
+        Lang.getEmbed('displayEmbeds.attendanceAlreadyTracking', data.lang),
+        true,
+      )
+      return
+    }
+
+    const initialMembers = Array.from(voiceChannel.members.values()).map((m) => ({
       id: m.id,
       displayName: m.displayName ?? m.user.username ?? 'Unknown',
     }))
 
-    const body = formatAttendanceDmBody(voiceChannel.name, entries)
-    const dm = await MessageUtils.send(intr.user, body)
+    const started = this.attendanceService.startTracking(
+      intr.user.id,
+      voiceChannel.id,
+      voiceChannel.guild.id,
+      voiceChannel.name,
+      initialMembers,
+    )
 
-    if (!dm) {
+    if (!started) {
       await InteractionUtils.send(
         intr,
-        Lang.getEmbed('displayEmbeds.attendanceDmFailed', data.lang),
+        Lang.getEmbed('displayEmbeds.attendanceAlreadyTracking', data.lang),
         true,
       )
       return
@@ -61,7 +74,7 @@ export class AttendanceCommand implements Command {
 
     await InteractionUtils.send(
       intr,
-      Lang.getEmbed('displayEmbeds.attendanceSnapshotSent', data.lang, {
+      Lang.getEmbed('displayEmbeds.attendanceTrackStarted', data.lang, {
         CHANNEL_NAME: voiceChannel.name,
       }),
     )
