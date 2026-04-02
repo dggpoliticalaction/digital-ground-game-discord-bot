@@ -9,6 +9,7 @@ import {
 import { Args } from './index.js'
 import { Language } from '../models/enum-helpers/index.js'
 import { Lang } from '../services/index.js'
+import { ONBOARDING_CONFIGS } from '../commands/user/index.js'
 
 export const ChatCommandMetadata: {
   [command: string]: RESTPostAPIChatInputApplicationCommandsJSONBody
@@ -107,40 +108,15 @@ export const MessageCommandMetadata: {
 
 export const UserCommandMetadata: {
   [command: string]: RESTPostAPIContextMenuApplicationCommandsJSONBody
-} = {
-  SEND_DEV_ONBOARDING: {
-    type: ApplicationCommandType.User,
-    name: Lang.getRef('userCommands.sendDevOnboarding', Language.Default),
-    name_localizations: Lang.getRefLocalizationMap('userCommands.sendDevOnboarding'),
-    default_member_permissions: undefined,
-    dm_permission: true,
-  },
-  SEND_WELCOME_ONBOARDING: {
-    type: ApplicationCommandType.User,
-    name: Lang.getRef('userCommands.sendWelcomeOnboarding', Language.Default),
-    name_localizations: Lang.getRefLocalizationMap('userCommands.sendWelcomeOnboarding'),
-    default_member_permissions: undefined,
-    dm_permission: true,
-  },
-  SEND_EVENTS_ONBOARDING: {
-    type: ApplicationCommandType.User,
-    name: Lang.getRef('userCommands.sendEventsOnboarding', Language.Default),
-    name_localizations: Lang.getRefLocalizationMap('userCommands.sendEventsOnboarding'),
-    default_member_permissions: undefined,
-    dm_permission: true,
-  },
-  SEND_MEDIA_ONBOARDING: {
-    type: ApplicationCommandType.User,
-    name: Lang.getRef('userCommands.sendMediaOnboarding', Language.Default),
-    name_localizations: Lang.getRefLocalizationMap('userCommands.sendMediaOnboarding'),
-    default_member_permissions: undefined,
-    dm_permission: true,
-  },
-  SEND_RESEARCH_ONBOARDING: {
-    type: ApplicationCommandType.User,
-    name: Lang.getRef('userCommands.sendResearchOnboarding', Language.Default),
-    name_localizations: Lang.getRefLocalizationMap('userCommands.sendResearchOnboarding'),
-    default_member_permissions: undefined,
-    dm_permission: true,
-  },
-}
+} = Object.fromEntries(
+  ONBOARDING_CONFIGS.map(config => [
+    config.metadataKey,
+    {
+      type: ApplicationCommandType.User,
+      name: Lang.getRef(config.langKey, Language.Default),
+      name_localizations: Lang.getRefLocalizationMap(config.langKey),
+      default_member_permissions: undefined,
+      dm_permission: true,
+    },
+  ])
+)
