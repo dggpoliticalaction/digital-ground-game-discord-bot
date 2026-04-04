@@ -15,14 +15,16 @@ const Config = require('../../config/config.json')
  */
 export class ImmediateSyncDggpGoogleCalendarJob extends Job {
   public name = 'Immediate sync DGGP Google Calendar'
-  public schedule: string =
-    Config.jobs.syncDggpGoogleCalendarImmediate?.schedule ?? '* * * * * *'
+  public schedule: string = Config.jobs.syncDggpGoogleCalendarImmediate?.schedule ?? '* * * * * *'
   public log: boolean = Config.jobs.syncDggpGoogleCalendarImmediate?.log ?? true
   public override runOnce: boolean = Config.jobs.syncDggpGoogleCalendarImmediate?.runOnce ?? true
   public override initialDelaySecs: number =
     Config.jobs.syncDggpGoogleCalendarImmediate?.initialDelaySecs ?? 0
 
-  constructor(private client: Client, private calendarService: GoogleCalendarService) {
+  constructor(
+    private client: Client,
+    private calendarService: GoogleCalendarService,
+  ) {
     super()
   }
 

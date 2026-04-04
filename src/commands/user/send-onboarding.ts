@@ -7,7 +7,13 @@ import { Lang, Logger } from '../../services/index.js'
 import { InteractionUtils, MessageUtils } from '../../utils/index.js'
 import { type Command, CommandDeferType } from '../index.js'
 import { ServerRoles } from '../../constants/index.js'
-import { DevOnboarding, MediaOnboarding, ResearchOnboarding, EventsOnboarding, WelcomeOnboarding } from '../../constants/onboarding.js'
+import {
+  DevOnboarding,
+  MediaOnboarding,
+  ResearchOnboarding,
+  EventsOnboarding,
+  WelcomeOnboarding,
+} from '../../constants/onboarding.js'
 
 export interface OnboardingConfig {
   key: string
@@ -23,35 +29,35 @@ export const ONBOARDING_CONFIGS: OnboardingConfig[] = [
     title: DevOnboarding.Title,
     message: DevOnboarding.Message,
     langKey: 'userCommands.sendDevOnboarding',
-    metadataKey: "SEND_DEV_ONBOARDING"
+    metadataKey: 'SEND_DEV_ONBOARDING',
   },
   {
     key: 'media',
     title: MediaOnboarding.Title,
     message: MediaOnboarding.Message,
     langKey: 'userCommands.sendMediaOnboarding',
-    metadataKey: "SEND_MEDIA_ONBOARDING"
+    metadataKey: 'SEND_MEDIA_ONBOARDING',
   },
   {
     key: 'research',
     title: ResearchOnboarding.Title,
     message: ResearchOnboarding.Message,
     langKey: 'userCommands.sendResearchOnboarding',
-    metadataKey: "SEND_RESEARCH_ONBOARDING"
+    metadataKey: 'SEND_RESEARCH_ONBOARDING',
   },
   {
     key: 'events',
     title: EventsOnboarding.Title,
     message: EventsOnboarding.Message,
     langKey: 'userCommands.sendEventsOnboarding',
-    metadataKey: "SEND_EVENTS_ONBOARDING"
+    metadataKey: 'SEND_EVENTS_ONBOARDING',
   },
   {
     key: 'welcome',
     title: WelcomeOnboarding.Title,
     message: WelcomeOnboarding.Message,
     langKey: 'userCommands.sendWelcomeOnboarding',
-    metadataKey: "SEND_WELCOME_ONBOARDING"
+    metadataKey: 'SEND_WELCOME_ONBOARDING',
   },
 ]
 
@@ -99,7 +105,9 @@ export class SendOnboarding implements Command {
         ephemeral: true,
       })
 
-      Logger.warn(`Failed to send ${this.config.key} onboarding; ${intr.targetUser.tag} has DMs off`)
+      Logger.warn(
+        `Failed to send ${this.config.key} onboarding; ${intr.targetUser.tag} has DMs off`,
+      )
     }
   }
 }

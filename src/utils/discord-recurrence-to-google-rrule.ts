@@ -14,7 +14,10 @@ function discordWeekdayToByDay(w: GuildScheduledEventRecurrenceRuleWeekday): str
 
 /** RRULE UNTIL in UTC compact form (RFC 5545 DATE-TIME). */
 function formatUntilUtc(d: Date): string {
-  return d.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}Z$/, 'Z')
+  return d
+    .toISOString()
+    .replace(/[-:]/g, '')
+    .replace(/\.\d{3}Z$/, 'Z')
 }
 
 /** Discord Monday=0…Sunday=6 from a UTC date (getUTCDay Sunday=0…Saturday=6). */
@@ -42,9 +45,7 @@ export function discordRecurrenceRuleToGoogleRRule(
       segments.push('FREQ=WEEKLY', `INTERVAL=${interval}`)
       let byDay: string
       if (rule.byNWeekday?.length) {
-        byDay = rule.byNWeekday
-          .map((nw) => `${nw.n}${discordWeekdayToByDay(nw.day)}`)
-          .join(',')
+        byDay = rule.byNWeekday.map((nw) => `${nw.n}${discordWeekdayToByDay(nw.day)}`).join(',')
       } else if (rule.byWeekday?.length) {
         byDay = rule.byWeekday.map(discordWeekdayToByDay).join(',')
       } else {

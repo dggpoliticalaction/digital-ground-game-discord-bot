@@ -119,14 +119,6 @@ export class GoogleCalendarService {
           : {}),
       })
       this.calendar = google.calendar({ version: 'v3', auth })
-      // const eventList = await this.calendar.events.list({
-      //   calendarId: this.calendarId ?? 'primary',
-      //   timeMin: new Date().toISOString(),
-      //   maxResults: 10,
-      //   singleEvents: true,
-      //   orderBy: 'startTime',
-      // });
-      // console.log(eventList)
     } catch (err: unknown) {
       Logger.error(
         `Google Calendar: failed to read or parse credentials at ${credentialsPath}: ${formatGoogleApiError(err)}`,
@@ -177,7 +169,10 @@ export class GoogleCalendarService {
         pageToken = res.data.nextPageToken ?? undefined
       } while (pageToken)
     } catch (err: unknown) {
-      Logger.error(`Google Calendar: events.list failed: ${formatGoogleApiError(err)} For calendar list operations the calendar must be shared with the service account (or with the impersonation user if set).`, err)
+      Logger.error(
+        `Google Calendar: events.list failed: ${formatGoogleApiError(err)} For calendar list operations the calendar must be shared with the service account (or with the impersonation user if set).`,
+        err,
+      )
       return out
     }
     return out
@@ -203,18 +198,12 @@ export class GoogleCalendarService {
       })
       return res.data.id ?? null
     } catch (err: unknown) {
-      Logger.error(
-        `Google Calendar: events.insert failed: ${formatGoogleApiError(err)}`,
-        err,
-      )
+      Logger.error(`Google Calendar: events.insert failed: ${formatGoogleApiError(err)}`, err)
       return null
     }
   }
 
-  public async updateEvent(
-    eventId: string,
-    input: CalendarEventInput,
-  ): Promise<boolean> {
+  public async updateEvent(eventId: string, input: CalendarEventInput): Promise<boolean> {
     await this.ensureClient()
     if (!this.calendar || !this.calendarId) return false
     try {

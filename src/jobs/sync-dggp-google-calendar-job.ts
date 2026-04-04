@@ -17,7 +17,10 @@ export class SyncDggpGoogleCalendarJob extends Job {
   public override initialDelaySecs: number =
     Config.jobs.syncDggpGoogleCalendar?.initialDelaySecs ?? 60
 
-  constructor(private client: Client, private calendarService: GoogleCalendarService) {
+  constructor(
+    private client: Client,
+    private calendarService: GoogleCalendarService,
+  ) {
     super()
   }
 
