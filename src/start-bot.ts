@@ -26,13 +26,17 @@ import {
   GuildLeaveHandler,
   GuildMemberAddHandler,
   GuildMemberUpdateHandler,
-  GuildScheduledEventHandler,
   MessageHandler,
   ReactionHandler,
   TriggerHandler,
 } from './events/index.js'
 import { CustomClient } from './extensions/index.js'
-import { AutoCloseWelcomeThreadsJob, type Job } from './jobs/index.js'
+import {
+  AutoCloseWelcomeThreadsJob,
+  ImmediateSyncDggpGoogleCalendarJob,
+  SyncDggpGoogleCalendarJob,
+  type Job,
+} from './jobs/index.js'
 import { Bot } from './models/bot.js'
 import { type Reaction } from './reactions/index.js'
 import {
@@ -97,14 +101,12 @@ async function start(): Promise<void> {
     new CTAPostTrigger(),
   ]
 
-  // Google Calendar sync — credentials: service account JSON OR OAuth client "Download JSON"
+  // Google Calendar sync — service account JSON key path
   const googleCalendarService = new GoogleCalendarService(
     process.env.GOOGLE_CALENDAR_ID,
     process.env.GOOGLE_CALENDAR_CREDENTIALS ?? process.env.GOOGLE_APPLICATION_CREDENTIALS,
-    process.env.GOOGLE_CALENDAR_OAUTH_TOKEN_PATH,
+    process.env.GOOGLE_CALENDAR_IMPERSONATION_SUBJECT,
   )
-  const guildScheduledEventHandler = new GuildScheduledEventHandler(googleCalendarService)
-
   // Event handlers
   const guildJoinHandler = new GuildJoinHandler(eventDataService)
   const guildLeaveHandler = new GuildLeaveHandler()
@@ -117,7 +119,11 @@ async function start(): Promise<void> {
   const reactionHandler = new ReactionHandler(reactions, eventDataService)
 
   // Jobs
-  const jobs: Job[] = [new AutoCloseWelcomeThreadsJob(client)]
+  const jobs: Job[] = [
+    new AutoCloseWelcomeThreadsJob(client),
+    new ImmediateSyncDggpGoogleCalendarJob(client, googleCalendarService),
+    new SyncDggpGoogleCalendarJob(client, googleCalendarService),
+  ]
 
   // Bot
   const bot = new Bot(
@@ -131,7 +137,6 @@ async function start(): Promise<void> {
     commandHandler,
     buttonHandler,
     reactionHandler,
-    guildScheduledEventHandler,
     new JobService(jobs),
   )
 

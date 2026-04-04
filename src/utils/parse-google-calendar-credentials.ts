@@ -1,8 +1,10 @@
-export type ParsedGoogleCredentials =
-  | { kind: 'service_account'; credentials: Record<string, unknown> }
-  | { kind: 'oauth_client'; clientId: string; clientSecret: string }
-
-export function parseGoogleCredentialsJson(json: unknown): ParsedGoogleCredentials | null {
+/**
+ * Parse a Google Cloud **service account** JSON key for use with googleapis.
+ * Returns the raw credential object, or null if the file is not a service account key.
+ */
+export function parseServiceAccountCredentialsJson(
+  json: unknown,
+): Record<string, unknown> | null {
   if (json === null || typeof json !== 'object') {
     return null
   }
@@ -10,25 +12,14 @@ export function parseGoogleCredentialsJson(json: unknown): ParsedGoogleCredentia
 
   if (o.type === 'service_account') {
     if (typeof o.client_email === 'string' && typeof o.private_key === 'string') {
-      return { kind: 'service_account', credentials: o }
+      return o
     }
     return null
   }
 
   if (typeof o.client_email === 'string' && typeof o.private_key === 'string') {
-    return { kind: 'service_account', credentials: o }
+    return o
   }
 
-  const installed = o.installed as Record<string, unknown> | undefined
-  const web = o.web as Record<string, unknown> | undefined
-  const block = installed ?? web
-  if (!block) {
-    return null
-  }
-  const clientId = block.client_id
-  const clientSecret = block.client_secret
-  if (typeof clientId !== 'string' || typeof clientSecret !== 'string') {
-    return null
-  }
-  return { kind: 'oauth_client', clientId, clientSecret }
+  return null
 }

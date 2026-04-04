@@ -56,26 +56,15 @@ DISCORD_BOT_DEVELOPER_IDS="123456789012345678,987654321098765432" # comma-separa
 
 ### Optional: Google Calendar sync
 
-To sync Discord scheduled events (from the **DGG Political Action** server) to the DGGP group Google Calendar:
+To mirror Discord scheduled events from **DGG Political Action** into the DGGP group calendar, the bot runs an **hourly** job that reconciles with Google Calendar.
 
 1. Create a [Google Cloud project](https://console.cloud.google.com/) and enable the **Google Calendar API**.
 
-2. Choose **one** auth method:
+2. Create a **service account**, download its JSON key, and share the target Google Calendar with the service account email (**Make changes to events**).
 
-   **A — Service account (JSON key file)**  
-   - Create a service account, download its JSON key.  
-   - Share the target Google Calendar with the service account email and grant **Make changes to events**.  
-   - In `.env`: `GOOGLE_CALENDAR_ID`, `GOOGLE_APPLICATION_CREDENTIALS` = path to that JSON.
+3. In `.env`: `GOOGLE_CALENDAR_ID` and `GOOGLE_APPLICATION_CREDENTIALS` (path to that JSON), or `GOOGLE_CALENDAR_CREDENTIALS` instead of `GOOGLE_APPLICATION_CREDENTIALS` if you prefer. Share the target calendar with the **service account email** from that JSON (`client_email`), unless you use Workspace delegation (then set `GOOGLE_CALENDAR_IMPERSONATION_SUBJECT` and share the calendar with that user instead).
 
-   **B — OAuth 2.0 client (no service account; “Download JSON” from Google Cloud)**  
-   - In **APIs & Services → Credentials**, create an **OAuth client ID** (Desktop or Web).  
-   - Under the client, add **Authorized redirect URI**: `http://127.0.0.1:34567/oauth2callback` (or set `GOOGLE_OAUTH_REDIRECT_URI` to match what you add in Google Cloud).  
-   - Download the client JSON.  
-   - In `.env`: `GOOGLE_CALENDAR_ID`, `GOOGLE_CALENDAR_CREDENTIALS` = path to that JSON.  
-   - Run **once** on a machine with a browser: `npm run calendar:oauth` — sign in with the Google account that should own calendar writes. This writes `config/google-calendar-oauth-tokens.json` (gitignored).  
-   - Optional: `GOOGLE_CALENDAR_OAUTH_TOKEN_PATH` if you store tokens elsewhere.
-
-When configured, the bot will create/update/delete Google Calendar events when Discord scheduled events change. Sync state is stored in `config/calendar-sync-state.json`.
+The bot lists Google Calendar events in a fixed time window and compares them to Discord scheduled events. Discord is the source of truth: each new Google event’s description includes the Discord scheduled event id so the next run can tell what is already synced—no separate state file on disk.
 
 ### Not used
 

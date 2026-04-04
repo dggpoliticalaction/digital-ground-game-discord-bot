@@ -1,10 +1,33 @@
-import { OAuth2Client } from 'google-auth-library'
 import { google, type calendar_v3 } from 'googleapis'
 import { readFile } from 'node:fs/promises'
-import { join } from 'node:path'
 
-import { GOOGLE_CALENDAR_OAUTH_REDIRECT_URI, GOOGLE_CALENDAR_SCOPES } from '../constants/google-calendar-oauth.js'
-import { parseGoogleCredentialsJson } from '../utils/parse-google-calendar-credentials.js'
+import { GOOGLE_CALENDAR_SCOPES } from '../constants/google-calendar-scopes.js'
+import { parseServiceAccountCredentialsJson } from '../utils/parse-google-calendar-credentials.js'
+import { Logger } from './logger.js'
+
+function formatGoogleApiError(err: unknown): string {
+  if (err && typeof err === 'object') {
+    const e = err as Readonly<{
+      message?: string
+      code?: string | number
+      response?: Readonly<{ status?: number; data?: unknown }>
+    }>
+    const parts: string[] = []
+    if (e.message) parts.push(e.message)
+    if (e.code !== undefined) parts.push(`code=${String(e.code)}`)
+    if (e.response?.status !== undefined) parts.push(`http=${String(e.response.status)}`)
+    if (e.response?.data !== undefined) {
+      try {
+        parts.push(`data=${JSON.stringify(e.response.data)}`)
+      } catch {
+        parts.push('data=<unserializable>')
+      }
+    }
+    if (parts.length > 0) return parts.join(' | ')
+  }
+  if (err instanceof Error) return err.message
+  return String(err)
+}
 
 export interface CalendarEventInput {
   summary: string
@@ -12,38 +35,58 @@ export interface CalendarEventInput {
   start: Date
   end: Date
   location?: string | null
+  /** Google Calendar recurrence lines, e.g. `['RRULE:FREQ=WEEKLY;INTERVAL=1;BYDAY=MO']` */
+  recurrence?: string[] | null
+}
+
+/** Minimal fields from `events.list` used to correlate with Discord. */
+export interface ListedCalendarEvent {
+  id: string
+  summary?: string | null
+  description?: string | null
 }
 
 function toRFC3339(d: Date): string {
   return d.toISOString()
 }
 
-function defaultOAuthTokenPath(): string {
-  return join(process.cwd(), 'config/google-calendar-oauth-tokens.json')
-}
-
 export class GoogleCalendarService {
   private calendar: calendar_v3.Calendar | null = null
   private calendarId: string | null = null
   private credentialsPath: string | undefined
-  private oauthTokenPath: string | undefined
+  private impersonationSubject: string | undefined
   private initPromise: Promise<void> | null = null
 
   /**
-   * @param credentialsPath Path to either a service account JSON **or** an OAuth 2.0 client
-   *   secrets JSON (from Google Cloud → APIs & Services → Credentials → Download JSON).
-   * @param oauthTokenPath For OAuth clients only: JSON file with tokens (see `npm run calendar:oauth`).
+   * @param credentialsPath Path to a service account JSON key from Google Cloud.
+   * @param impersonationSubject If set, domain-wide delegation user (calendar must be shared with
+   *   this user). If unset, requests use the service account identity (share calendar with
+   *   `client_email` from the key).
    */
   constructor(
     calendarId: string | undefined,
     credentialsPath: string | undefined,
-    oauthTokenPath?: string | undefined,
+    impersonationSubject?: string | undefined,
   ) {
-    this.credentialsPath = calendarId && credentialsPath ? credentialsPath : undefined
+    const calId = calendarId?.trim() || undefined
+    const credPath = credentialsPath?.trim() || undefined
+    this.impersonationSubject = impersonationSubject?.trim() || undefined
+    this.credentialsPath = calId && credPath ? credPath : undefined
     if (this.credentialsPath) {
-      this.calendarId = calendarId ?? null
-      this.oauthTokenPath = oauthTokenPath ?? defaultOAuthTokenPath()
+      this.calendarId = calId ?? null
     }
+  }
+
+  /** Load credentials and construct the API client. Call before list/create; use `isEnabled()` after. */
+  public async ensureInitialized(): Promise<boolean> {
+    await this.ensureClient()
+    if (!this.calendar || !this.calendarId) {
+      Logger.error(
+        'Google Calendar: client is not initialized. Check GOOGLE_CALENDAR_CREDENTIALS / GOOGLE_APPLICATION_CREDENTIALS path, that the file is a service account JSON, and GOOGLE_CALENDAR_ID. Recent errors should appear above.',
+      )
+      return false
+    }
+    return true
   }
 
   private async ensureClient(): Promise<void> {
@@ -61,39 +104,34 @@ export class GoogleCalendarService {
     try {
       const raw = await readFile(credentialsPath, 'utf-8')
       const json: unknown = JSON.parse(raw)
-      const parsed = parseGoogleCredentialsJson(json)
-      if (!parsed) {
+      const credentials = parseServiceAccountCredentialsJson(json)
+      if (!credentials) {
+        Logger.error(
+          'Google Calendar: credentials JSON must be a service account key (type service_account with client_email and private_key).',
+        )
         return
       }
-      if (parsed.kind === 'service_account') {
-        const auth = new google.auth.GoogleAuth({
-          credentials: parsed.credentials,
-          scopes: [...GOOGLE_CALENDAR_SCOPES],
-        })
-        this.calendar = google.calendar({ version: 'v3', auth })
-        return
-      }
-      if (!this.oauthTokenPath) {
-        return
-      }
-      let tokenRaw: string
-      try {
-        tokenRaw = await readFile(this.oauthTokenPath, 'utf-8')
-      } catch {
-        return
-      }
-      const tokens = JSON.parse(tokenRaw) as { refresh_token?: string }
-      if (!tokens.refresh_token) {
-        return
-      }
-      const oauth2Client = new OAuth2Client(
-        parsed.clientId,
-        parsed.clientSecret,
-        GOOGLE_CALENDAR_OAUTH_REDIRECT_URI,
+      const auth = new google.auth.GoogleAuth({
+        credentials,
+        scopes: [...GOOGLE_CALENDAR_SCOPES],
+        ...(this.impersonationSubject
+          ? { clientOptions: { subject: this.impersonationSubject } }
+          : {}),
+      })
+      this.calendar = google.calendar({ version: 'v3', auth })
+      // const eventList = await this.calendar.events.list({
+      //   calendarId: this.calendarId ?? 'primary',
+      //   timeMin: new Date().toISOString(),
+      //   maxResults: 10,
+      //   singleEvents: true,
+      //   orderBy: 'startTime',
+      // });
+      // console.log(eventList)
+    } catch (err: unknown) {
+      Logger.error(
+        `Google Calendar: failed to read or parse credentials at ${credentialsPath}: ${formatGoogleApiError(err)}`,
+        err,
       )
-      oauth2Client.setCredentials(tokens)
-      this.calendar = google.calendar({ version: 'v3', auth: oauth2Client })
-    } catch {
       this.calendar = null
     }
   }
@@ -108,22 +146,67 @@ export class GoogleCalendarService {
     return this.calendar !== null && this.calendarId !== null
   }
 
+  /**
+   * List non-deleted events in [timeMin, timeMax] (paginated). Uses primary `dateTime` bounds.
+   */
+  public async listEventsBetween(timeMin: Date, timeMax: Date): Promise<ListedCalendarEvent[]> {
+    await this.ensureClient()
+    if (!this.calendar || !this.calendarId) return []
+    const out: ListedCalendarEvent[] = []
+    let pageToken: string | undefined
+    try {
+      do {
+        const res = await this.calendar.events.list({
+          calendarId: this.calendarId,
+          timeMin: toRFC3339(timeMin),
+          timeMax: toRFC3339(timeMax),
+          singleEvents: true,
+          orderBy: 'startTime',
+          maxResults: 2500,
+          pageToken,
+        })
+        for (const item of res.data.items ?? []) {
+          if (item.id && item.status !== 'cancelled') {
+            out.push({
+              id: item.id,
+              summary: item.summary,
+              description: item.description,
+            })
+          }
+        }
+        pageToken = res.data.nextPageToken ?? undefined
+      } while (pageToken)
+    } catch (err: unknown) {
+      Logger.error(`Google Calendar: events.list failed: ${formatGoogleApiError(err)} For calendar list operations the calendar must be shared with the service account (or with the impersonation user if set).`, err)
+      return out
+    }
+    return out
+  }
+
   public async createEvent(input: CalendarEventInput): Promise<string | null> {
     await this.ensureClient()
     if (!this.calendar || !this.calendarId) return null
     try {
+      const body: calendar_v3.Schema$Event = {
+        summary: input.summary,
+        description: input.description ?? undefined,
+        start: { dateTime: toRFC3339(input.start), timeZone: 'UTC' },
+        end: { dateTime: toRFC3339(input.end), timeZone: 'UTC' },
+        location: input.location ?? undefined,
+      }
+      if (input.recurrence?.length) {
+        body.recurrence = input.recurrence
+      }
       const res = await this.calendar.events.insert({
         calendarId: this.calendarId,
-        requestBody: {
-          summary: input.summary,
-          description: input.description ?? undefined,
-          start: { dateTime: toRFC3339(input.start), timeZone: 'UTC' },
-          end: { dateTime: toRFC3339(input.end), timeZone: 'UTC' },
-          location: input.location ?? undefined,
-        },
+        requestBody: body,
       })
       return res.data.id ?? null
-    } catch {
+    } catch (err: unknown) {
+      Logger.error(
+        `Google Calendar: events.insert failed: ${formatGoogleApiError(err)}`,
+        err,
+      )
       return null
     }
   }
@@ -135,16 +218,20 @@ export class GoogleCalendarService {
     await this.ensureClient()
     if (!this.calendar || !this.calendarId) return false
     try {
+      const body: calendar_v3.Schema$Event = {
+        summary: input.summary,
+        description: input.description ?? undefined,
+        start: { dateTime: toRFC3339(input.start), timeZone: 'UTC' },
+        end: { dateTime: toRFC3339(input.end), timeZone: 'UTC' },
+        location: input.location ?? undefined,
+      }
+      if (input.recurrence?.length) {
+        body.recurrence = input.recurrence
+      }
       await this.calendar.events.patch({
         calendarId: this.calendarId,
         eventId,
-        requestBody: {
-          summary: input.summary,
-          description: input.description ?? undefined,
-          start: { dateTime: toRFC3339(input.start), timeZone: 'UTC' },
-          end: { dateTime: toRFC3339(input.end), timeZone: 'UTC' },
-          location: input.location ?? undefined,
-        },
+        requestBody: body,
       })
       return true
     } catch {

@@ -6,9 +6,7 @@
 
 /config/bot-sites.json
 /config/debug.json
-/config/calendar-sync-state.json
-/config/google-calendar-oauth-tokens.json
-serviceKey.json
+serviceKey*.json
 
 # =====================================================
 # Node.js
