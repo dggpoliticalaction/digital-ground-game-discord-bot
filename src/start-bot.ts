@@ -18,7 +18,10 @@ import {
   MessageCommandMetadata,
   UserCommandMetadata,
 } from './commands/index.js'
-import { SendDevOnboarding } from './commands/user/index.js'
+import { 
+  SendOnboarding,
+  ONBOARDING_CONFIGS
+} from './commands/user/index.js'
 import {
   ButtonHandler,
   CommandHandler,
@@ -82,7 +85,7 @@ async function start(): Promise<void> {
     new CensusCommand(),
 
     // User Context Commands
-    new SendDevOnboarding(),
+    ...ONBOARDING_CONFIGS.map(config => new SendOnboarding(config)),
   ]
 
   // Buttons
