@@ -30,6 +30,7 @@ import {
   type ReactionHandler,
 } from '../events/index.js'
 import { type JobService, Logger } from '../services/index.js'
+import { DGGP_GUILD_NAME } from '../constants/dggp-guild.js'
 import { PartialUtils } from '../utils/index.js'
 import { CTAPostTrigger } from '../triggers/cta-post.js'
 
@@ -38,8 +39,6 @@ const Config = require('../../config/config.json')
 const Debug = require('../../config/debug.json')
 const Logs = require('../../lang/logs.json')
 const ctaChannelName = 'call-to-action'
-const guildName = 'DGG Political Action'
-
 export class Bot {
   private ready = false
 
@@ -109,7 +108,7 @@ export class Bot {
     Logger.info(Logs.info.clientReady)
 
     const ctaChannel = this.client.guilds.cache
-      .find((dggPol) => dggPol.name === guildName)
+      .find((dggPol) => dggPol.name === DGGP_GUILD_NAME)
       ?.channels.cache.find((ctaChan) => ctaChan?.name === ctaChannelName)
     const d = new Date()
 
