@@ -5,6 +5,7 @@
     "intents": [
       "Guilds",
       "GuildMembers",
+      "GuildVoiceStates",
       "GuildPresences",
       "GuildMessages",
       "GuildMessageReactions",
@@ -25,8 +26,7 @@
       "PresenceManager": 0,
       "StageInstanceManager": 0,
       "ThreadManager": 0,
-      "ThreadMemberManager": 0,
-      "VoiceStateManager": 0
+      "ThreadMemberManager": 0
     }
   },
   "api": {
